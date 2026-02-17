@@ -1,2 +1,43 @@
 {% extends 'base.html' %}
-{% block 'body' %}<div class="p-8"><h1>Relatórios</h1><a href="{% url 'financeiro_exportar' 'csv' %}">Exportar CSV</a> | <a href="{% url 'financeiro_exportar' 'xlsx' %}">Exportar XLSX</a><h2>DRE</h2><ul>{% for d in dre %}<li>{{ d.categoria__grupo_dre }}: {{ d.total }}</li>{% endfor %}</ul></div>{% endblock %}
+{% block 'title' %}Financeiro | Relatórios{% endblock %}
+{% block 'body' %}
+<div class="mx-auto max-w-6xl p-6 md:p-8">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <h1 class="text-3xl font-bold">Relatórios</h1>
+        <div class="flex gap-3">
+            <a class="theme-btn" href="{% url 'financeiro_exportar' 'csv' %}">Exportar CSV</a>
+            <a class="theme-btn" href="{% url 'financeiro_exportar' 'xlsx' %}">Exportar XLSX</a>
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <section class="theme-card rounded-xl p-4">
+            <h2 class="text-lg font-semibold">DRE por grupo</h2>
+            <ul class="mt-3 space-y-2">
+                {% for d in dre %}
+                    <li class="flex items-center justify-between rounded-lg border border-slate-300/60 p-3">
+                        <span>{{ d.categoria__grupo_dre|default:'Sem grupo' }}</span>
+                        <strong>R$ {{ d.total }}</strong>
+                    </li>
+                {% empty %}
+                    <li class="theme-muted">Sem dados de DRE.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="theme-card rounded-xl p-4">
+            <h2 class="text-lg font-semibold">Últimos lançamentos</h2>
+            <ul class="mt-3 space-y-2 text-sm">
+                {% for item in lancamentos %}
+                    <li class="rounded-lg border border-slate-300/60 p-3">
+                        <p class="font-medium">{{ item.descricao }}</p>
+                        <p class="theme-muted">{{ item.vencimento }} • {{ item.tipo }} • R$ {{ item.valor }}</p>
+                    </li>
+                {% empty %}
+                    <li class="theme-muted">Sem lançamentos no relatório.</li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+</div>
+{% endblock %}
