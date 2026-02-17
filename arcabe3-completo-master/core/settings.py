@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'martor',
     'ia',
     'django_q',
+    'financeiro',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,2 @@
+{% extends 'base.html' %}
+{% block 'body' %}<div class="p-8"><h1>Relatórios</h1><a href="{% url 'financeiro_exportar' 'csv' %}">Exportar CSV</a> | <a href="{% url 'financeiro_exportar' 'xlsx' %}">Exportar XLSX</a><h2>DRE</h2><ul>{% for d in dre %}<li>{{ d.categoria__grupo_dre }}: {{ d.total }}</li>{% endfor %}</ul></div>{% endblock %}

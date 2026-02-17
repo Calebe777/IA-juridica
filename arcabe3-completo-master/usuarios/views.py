@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.messages import constants
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from .models import Cliente, Documentos
+from .models import Cliente, Documentos, get_or_create_user_organization
 from ia.agents import JuriAi
+
 
 def cadastro(request):
     if request.method == 'GET':
@@ -21,23 +21,24 @@ def cadastro(request):
         if not senha == confirmar_senha:
             messages.add_message(request, constants.ERROR, 'Senha e confirmar senha não são iguais.')
             return redirect('cadastro')
-        
+
         if len(senha) < 6:
             messages.add_message(request, constants.ERROR, 'Sua senha deve ter pelo meno 6 caracteres.')
             return redirect('cadastro')
-        
+
         users = User.objects.filter(username=username)
-        
+
         if users.exists():
             messages.add_message(request, constants.ERROR, 'Já existe um usuário com esse username.')
             return redirect('cadastro')
-        
+
         User.objects.create_user(
             username=username,
             password=senha
         )
 
         return redirect('login')
+
 
 def login(request):
     if request.method == 'GET':
@@ -53,17 +54,15 @@ def login(request):
         else:
             messages.add_message(request, constants.ERROR, 'Usuário ou senha inválidos.')
             return redirect('login')
-        
+
 
 @login_required(login_url='login')
 def clientes(request):
-    if request.method == 'GET':
-        clientes = Cliente.objects.filter(user=request.user)
-        clientes_ativos = clientes.filter(status=True).count()
-        clientes_pf = clientes.filter(tipo='PF', status=True).count()
-        clientes_pj = clientes.filter(tipo='PJ', status=True).count()
+    organizacao = get_or_create_user_organization(request.user)
 
-        receita_estimada = (clientes_pf * 350) + (clientes_pj * 900)
+    if request.method == 'GET':
+        clientes = Cliente.objects.filter(organizacao=organizacao)
+        clientes_ativos = clientes.filter(status=True).count()
 
         return render(
             request,
@@ -71,8 +70,7 @@ def clientes(request):
             {
                 'clientes': clientes,
                 'clientes_ativos': clientes_ativos,
-                'receita_estimada': receita_estimada,
-                'ticket_medio_estimado': round(receita_estimada / clientes_ativos, 2) if clientes_ativos else 0,
+                'clientes_inativos': clientes.count() - clientes_ativos,
             },
         )
     elif request.method == 'POST':
@@ -86,15 +84,18 @@ def clientes(request):
             email=email,
             tipo=tipo,
             status=status,
-            user=request.user
+            user=request.user,
+            organizacao=organizacao,
         )
 
         messages.add_message(request, constants.SUCCESS, 'Cliente cadastrado com sucesso!')
         return redirect('clientes')
 
+
 @login_required(login_url='login')
 def cliente(request, id):
-    cliente = get_object_or_404(Cliente, id=id, user=request.user)
+    organizacao = get_or_create_user_organization(request.user)
+    cliente = get_object_or_404(Cliente, id=id, organizacao=organizacao)
     if request.method == 'GET':
         documentos = Documentos.objects.filter(cliente=cliente)
         return render(request, 'cliente.html', {'cliente': cliente, 'documentos': documentos})
@@ -102,7 +103,7 @@ def cliente(request, id):
         tipo = request.POST.get('tipo')
         documento = request.FILES.get('documento')
         data = request.POST.get('data')
-        
+
         documentos = Documentos(
             cliente=cliente,
             tipo=tipo,
@@ -113,4 +114,3 @@ def cliente(request, id):
         documentos.save()
 
         return redirect(reverse('cliente', kwargs={'id': cliente.id}))
-    
