@@ -1,0 +1,2 @@
+{% extends 'base.html' %}
+{% block 'body' %}<div class="p-8"><h1>Categorias</h1>{% if role == 'FULL' %}<form method="post">{% csrf_token %}<input name="nome" required><select name="tipo"><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option></select><input name="grupo_dre" placeholder="Grupo DRE"><label><input type="checkbox" name="nao_entrar_dre">Não entra no DRE</label><button>Criar</button></form>{% endif %}<ul>{% for c in categorias %}<li>{{ c.nome }} - {{ c.tipo }}</li>{% endfor %}</ul></div>{% endblock %}
