@@ -39,6 +39,28 @@
             </div>
         {% endif %}
 
+
+        <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <form method="GET" action="{% url 'clientes' %}" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div class="relative flex-1">
+                    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔎</span>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ busca|default:'' }}"
+                        placeholder="Pesquisar por nome ou e-mail"
+                        class="w-full rounded-xl border border-slate-300 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                    >
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500">Pesquisar</button>
+                    {% if busca %}
+                        <a href="{% url 'clientes' %}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100">Limpar</a>
+                    {% endif %}
+                </div>
+            </form>
+        </section>
+
         <section class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
             <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Total de clientes</p>

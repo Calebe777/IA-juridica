@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from .models import Cliente, Documentos, get_or_create_user_organization
 from ia.agents import JuriAi
 
@@ -62,6 +63,10 @@ def clientes(request):
 
     if request.method == 'GET':
         clientes = Cliente.objects.filter(organizacao=organizacao)
+        busca = request.GET.get('q', '').strip()
+        if busca:
+            clientes = clientes.filter(Q(nome__icontains=busca) | Q(email__icontains=busca))
+
         clientes_ativos = clientes.filter(status=True).count()
 
         return render(
@@ -71,6 +76,7 @@ def clientes(request):
                 'clientes': clientes,
                 'clientes_ativos': clientes_ativos,
                 'clientes_inativos': clientes.count() - clientes_ativos,
+                'busca': busca,
             },
         )
     elif request.method == 'POST':
