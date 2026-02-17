@@ -1,2 +1,33 @@
 {% extends 'base.html' %}
-{% block 'body' %}<div class="p-8"><h1>Contas</h1>{% if role == 'FULL' %}<form method="post">{% csrf_token %}<input name="nome" required><select name="tipo"><option>BANCO</option><option>CAIXA</option><option>CARTAO</option><option>GATEWAY</option></select><input name="saldo_inicial" type="number" step="0.01"><button>Criar</button></form>{% endif %}<ul>{% for c in contas %}<li>{{ c.nome }} - {{ c.tipo }}</li>{% endfor %}</ul></div>{% endblock %}
+{% block 'title' %}Financeiro | Contas{% endblock %}
+{% block 'body' %}
+<div class="mx-auto max-w-4xl p-6 md:p-8">
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-3xl font-bold">Contas financeiras</h1>
+        <a class="theme-link" href="{% url 'financeiro_dashboard' %}">← Dashboard</a>
+    </div>
+
+    {% if role == 'FULL' %}
+    <form method="post" class="theme-card mb-6 grid gap-3 rounded-xl p-4 md:grid-cols-2">
+        {% csrf_token %}
+        <input class="theme-input" name="nome" placeholder="Nome da conta" required>
+        <select class="theme-input" name="tipo"><option>BANCO</option><option>CAIXA</option><option>CARTAO</option><option>GATEWAY</option></select>
+        <input class="theme-input" name="saldo_inicial" type="number" step="0.01" placeholder="Saldo inicial">
+        <button class="theme-btn" type="submit">Criar conta</button>
+    </form>
+    {% endif %}
+
+    <div class="theme-card rounded-xl p-4">
+        <ul class="space-y-2">
+            {% for c in contas %}
+                <li class="rounded-lg border border-slate-300/60 p-3">
+                    <p class="font-semibold">{{ c.nome }}</p>
+                    <p class="theme-muted text-sm">Tipo: {{ c.tipo }}</p>
+                </li>
+            {% empty %}
+                <li class="theme-muted">Nenhuma conta cadastrada.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

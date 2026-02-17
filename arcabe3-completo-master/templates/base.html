@@ -5,11 +5,75 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{% block 'title' %}Painel Jurídico{% endblock 'title' %}</title>
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <style>
+            :root {
+                color-scheme: light;
+                --bg: #f1f5f9;
+                --bg-alt: #e2e8f0;
+                --text: #0f172a;
+                --muted: #475569;
+                --card: #ffffff;
+                --border: #cbd5e1;
+                --primary: #0f766e;
+                --primary-hover: #115e59;
+            }
+
+            [data-theme='dark'] {
+                color-scheme: dark;
+                --bg: #020617;
+                --bg-alt: #0f172a;
+                --text: #e2e8f0;
+                --muted: #94a3b8;
+                --card: #111827;
+                --border: #334155;
+                --primary: #14b8a6;
+                --primary-hover: #2dd4bf;
+            }
+
+            body {
+                background: linear-gradient(var(--bg), var(--bg-alt));
+                color: var(--text);
+            }
+
+            .theme-card { background: var(--card); border: 1px solid var(--border); }
+            .theme-muted { color: var(--muted); }
+            .theme-link { color: var(--primary); font-weight: 600; }
+            .theme-link:hover { color: var(--primary-hover); }
+            .theme-input {
+                width: 100%; border: 1px solid var(--border); background: transparent;
+                padding: .55rem .75rem; border-radius: .6rem;
+            }
+            .theme-btn {
+                background: var(--primary); color: #fff; border-radius: .6rem; padding: .55rem .95rem;
+                font-weight: 600; border: 0;
+            }
+            .theme-btn:hover { background: var(--primary-hover); }
+        </style>
         {% block 'head' %}
         {% endblock 'head' %}
     </head>
-    <body class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 text-slate-800 antialiased">
+    <body class="min-h-screen antialiased transition-colors duration-200">
+        <button id="theme-toggle" class="fixed right-4 top-4 z-50 rounded-lg px-3 py-2 text-sm font-semibold theme-card" type="button">🌙 Modo escuro</button>
         {% block 'body' %}
         {% endblock 'body' %}
+        <script>
+            (() => {
+                const root = document.documentElement;
+                const saved = localStorage.getItem('painel-theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const applyTheme = (theme) => {
+                    root.setAttribute('data-theme', theme);
+                    const button = document.getElementById('theme-toggle');
+                    button.textContent = theme === 'dark' ? '☀️ Modo claro' : '🌙 Modo escuro';
+                };
+
+                applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+                document.getElementById('theme-toggle').addEventListener('click', () => {
+                    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                    localStorage.setItem('painel-theme', next);
+                    applyTheme(next);
+                });
+            })();
+        </script>
     </body>
 </html>

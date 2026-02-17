@@ -5,6 +5,7 @@ from io import BytesIO
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from django.db.models.functions import TruncMonth
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
@@ -28,6 +29,34 @@ def dashboard(request):
     mensal = base.filter(vencimento__year=today.year, vencimento__month=today.month)
     receitas = mensal.filter(tipo='RECEITA').aggregate(total=Sum('valor'))['total'] or 0
     despesas = mensal.filter(tipo='DESPESA').aggregate(total=Sum('valor'))['total'] or 0
+
+    monthly_raw = (
+        base.filter(vencimento__year=today.year)
+        .annotate(mes=TruncMonth('vencimento'))
+        .values('mes', 'tipo')
+        .annotate(total=Sum('valor'))
+        .order_by('mes')
+    )
+    monthly_index = {m: {'RECEITA': 0, 'DESPESA': 0} for m in range(1, 13)}
+    for row in monthly_raw:
+        if row['mes']:
+            monthly_index[row['mes'].month][row['tipo']] = float(row['total'] or 0)
+
+    monthly_labels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+    monthly_series = [
+        {'label': monthly_labels[i - 1], 'receita': monthly_index[i]['RECEITA'], 'despesa': monthly_index[i]['DESPESA']}
+        for i in range(1, 13)
+    ]
+    max_ano = max([item['receita'] for item in monthly_series] + [item['despesa'] for item in monthly_series] + [1])
+
+    top_categorias = list(
+        base.filter(tipo='DESPESA')
+        .values('categoria__nome')
+        .annotate(total=Sum('valor'))
+        .order_by('-total')[:5]
+    )
+    max_categoria = max([float(item['total'] or 0) for item in top_categorias] + [1])
+
     return render(request, 'financeiro/dashboard.html', {
         'role': role,
         'saldos': saldos,
@@ -36,6 +65,10 @@ def dashboard(request):
         'a_pagar': base.filter(tipo='DESPESA', status='VENCIDO').count(),
         'a_receber': base.filter(tipo='RECEITA', status='VENCIDO').count(),
         'projecao': base.filter(status='PREVISTO').aggregate(total=Sum('valor'))['total'] or 0,
+        'monthly_series': monthly_series,
+        'max_ano': max_ano,
+        'top_categorias': top_categorias,
+        'max_categoria': max_categoria,
     })
 
 
