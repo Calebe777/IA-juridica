@@ -6,6 +6,7 @@ from django.contrib.messages import constants
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib import auth
+from django.contrib.auth.decorators import login_required
 from .models import Cliente, Documentos
 from ia.agents import JuriAi
 
@@ -54,10 +55,26 @@ def login(request):
             return redirect('login')
         
 
+@login_required(login_url='login')
 def clientes(request):
     if request.method == 'GET':
         clientes = Cliente.objects.filter(user=request.user)
-        return render(request, 'clientes.html', {'clientes': clientes})
+        clientes_ativos = clientes.filter(status=True).count()
+        clientes_pf = clientes.filter(tipo='PF', status=True).count()
+        clientes_pj = clientes.filter(tipo='PJ', status=True).count()
+
+        receita_estimada = (clientes_pf * 350) + (clientes_pj * 900)
+
+        return render(
+            request,
+            'clientes.html',
+            {
+                'clientes': clientes,
+                'clientes_ativos': clientes_ativos,
+                'receita_estimada': receita_estimada,
+                'ticket_medio_estimado': round(receita_estimada / clientes_ativos, 2) if clientes_ativos else 0,
+            },
+        )
     elif request.method == 'POST':
         nome = request.POST.get('nome')
         email = request.POST.get('email')
@@ -75,8 +92,9 @@ def clientes(request):
         messages.add_message(request, constants.SUCCESS, 'Cliente cadastrado com sucesso!')
         return redirect('clientes')
 
+@login_required(login_url='login')
 def cliente(request, id):
-    cliente = Cliente.objects.get(id=id)
+    cliente = get_object_or_404(Cliente, id=id, user=request.user)
     if request.method == 'GET':
         documentos = Documentos.objects.filter(cliente=cliente)
         return render(request, 'cliente.html', {'cliente': cliente, 'documentos': documentos})
