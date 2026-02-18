@@ -1,0 +1,34 @@
+/*
+  ARQUIVO DE EXEMPLOS PARA VOCÊ PERSONALIZAR O LAYOUT
+  ----------------------------------------------------
+  1) Edite este arquivo.
+  2) Salve e recarregue a página.
+  3) Se não refletir, limpe cache (Ctrl+F5).
+*/
+
+/* EXEMPLO 1: CENTRALIZAR TÍTULOS */
+h1 {
+  text-align: center;
+}
+
+/* EXEMPLO 2: MUDAR COR DOS BOTÕES DE ENVIO */
+button[type="submit"] {
+  background-color: #7c3aed;
+  color: #ffffff;
+}
+
+/* EXEMPLO 3: CENTRALIZAR TABELAS */
+table th,
+table td {
+  text-align: center;
+}
+
+/* EXEMPLO 4: ARREDONDAR CARDS */
+.theme-card {
+  border-radius: 14px;
+}
+
+/* EXEMPLO 5: AJUSTAR ESPAÇAMENTO GLOBAL */
+body {
+  letter-spacing: 0.01em;
+}
