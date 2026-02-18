@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 {% block 'title' %}Financeiro | Lançamentos{% endblock %}
 {% block 'body' %}
+<!-- TELA DE LANÇAMENTOS FINANCEIROS -->
 <div class="mx-auto max-w-7xl p-6 md:p-8">
     <div class="mb-6 flex items-center justify-between">
         <h1 class="text-3xl font-bold">Lançamentos</h1>
         <a class="theme-link" href="{% url 'financeiro_dashboard' %}">← Voltar ao dashboard</a>
     </div>
 
+    <!-- FORMULÁRIO DE NOVO LANÇAMENTO (APENAS PERFIL FULL) -->
     {% if role == 'FULL' %}
     <form method="post" class="theme-card mb-6 grid gap-3 rounded-xl p-4 md:grid-cols-2 xl:grid-cols-4">
         {% csrf_token %}
@@ -23,6 +25,7 @@
     </form>
     {% endif %}
 
+    <!-- TABELA COM OS LANÇAMENTOS CADASTRADOS -->
     <div class="theme-card overflow-auto rounded-xl p-2">
         <table class="min-w-full text-sm">
             <thead>

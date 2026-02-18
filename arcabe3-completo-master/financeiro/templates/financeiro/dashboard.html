@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% block 'title' %}Financeiro | Dashboard{% endblock %}
 {% block 'body' %}
+<!-- CONTAINER GERAL DO DASHBOARD FINANCEIRO -->
 <div class="mx-auto max-w-7xl p-6 md:p-8">
+    <!-- TÍTULO + NAVEGAÇÃO ENTRE MÓDULOS FINANCEIROS -->
     <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-3xl font-bold tracking-tight">Financeiro • Dashboard</h1>
@@ -20,6 +22,7 @@
         </nav>
     </div>
 
+    <!-- CARDS DE INDICADORES PRINCIPAIS -->
     <section class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <article class="theme-card rounded-2xl p-5 shadow-sm">
             <p class="text-sm theme-muted">Receitas no mês</p>
@@ -39,6 +42,7 @@
         </article>
     </section>
 
+    <!-- BLOCO DE GRÁFICOS/COMPARATIVOS -->
     <section class="mt-6 grid gap-6 lg:grid-cols-5">
         <article class="theme-card rounded-2xl p-5 lg:col-span-3 shadow-sm">
             <div class="mb-4 flex items-center justify-between">
@@ -100,6 +104,7 @@
         </article>
     </section>
 
+    <!-- LISTA DE SALDOS POR CONTA -->
     <section class="mt-6 theme-card rounded-2xl p-5 shadow-sm">
         <h2 class="text-lg font-semibold">Saldos por conta</h2>
         <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
