@@ -1,0 +1,40 @@
+/*
+  ARQUIVO DE EXEMPLOS PARA VOCÊ PERSONALIZAR O LAYOUT
+  ----------------------------------------------------
+  Como usar:
+  1) Edite este arquivo.
+  2) Salve e recarregue a página.
+  3) Se não refletir, limpe cache (Ctrl+F5).
+*/
+
+/* EXEMPLO 1: CENTRALIZAR TÍTULOS */
+#login-titulo,
+#cadastro-titulo {
+  text-align: center;
+}
+
+/* EXEMPLO 2: MUDAR COR DE BOTÕES PRINCIPAIS */
+#clientes-page button[type="submit"],
+#login-page button[type="submit"],
+#cadastro-page button[type="submit"] {
+  background-color: #7c3aed; /* roxo */
+}
+
+/* EXEMPLO 3: CENTRALIZAR CONTEÚDO DA TABELA DE CLIENTES */
+#clientes-tabela table th,
+#clientes-tabela table td {
+  text-align: center;
+}
+
+/* EXEMPLO 4: FUNDO DIFERENTE PARA CADA MÓDULO FINANCEIRO */
+#financeiro-dashboard-page { background: rgba(16, 185, 129, 0.05); border-radius: 16px; }
+#financeiro-lancamentos-page { background: rgba(59, 130, 246, 0.05); border-radius: 16px; }
+#financeiro-contas-page { background: rgba(245, 158, 11, 0.05); border-radius: 16px; }
+#financeiro-categorias-page { background: rgba(168, 85, 247, 0.05); border-radius: 16px; }
+#financeiro-relatorios-page { background: rgba(239, 68, 68, 0.05); border-radius: 16px; }
+
+/* EXEMPLO 5: ESPAÇAMENTO GERAL DA PÁGINA DE CLIENTES */
+#clientes-page {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}

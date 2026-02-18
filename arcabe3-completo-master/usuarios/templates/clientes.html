@@ -10,6 +10,7 @@
 {% endblock 'head' %}
 
 {% block 'body' %}
+    <!-- TOPO/NAVEGAÇÃO DA TELA DE CLIENTES -->
     <div class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
         <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-3 sm:px-10">
             <a href="{% url 'clientes' %}" class="text-sm font-semibold text-indigo-700">Painel Jurídico</a>
@@ -20,8 +21,10 @@
         </nav>
     </div>
 
-    <div class="mx-auto max-w-7xl p-6 sm:p-10">
-        <header class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <!-- CONTEÚDO PRINCIPAL (LISTAGEM DE CLIENTES) -->
+    <div id="clientes-page" class="mx-auto max-w-7xl p-6 sm:p-10">
+        <!-- CABEÇALHO DA PÁGINA + BOTÃO NOVO CLIENTE -->
+        <header id="clientes-header" class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight text-slate-900">Clientes</h1>
                 <p class="mt-1 text-sm text-slate-500">Clientes ilimitados por escritório, sem consumo de tickets.</p>
@@ -31,6 +34,7 @@
             </button>
         </header>
 
+        <!-- ALERTAS/MENSAGENS DO DJANGO -->
         {% if messages %}
             <div class="mb-6 space-y-2">
                 {% for message in messages %}
@@ -38,8 +42,7 @@
                 {% endfor %}
             </div>
         {% endif %}
-
-
+        <!-- FILTRO/PESQUISA DE CLIENTES -->
         <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <form method="GET" action="{% url 'clientes' %}" class="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div class="relative flex-1">
@@ -61,6 +64,7 @@
             </form>
         </section>
 
+        <!-- CARDS DE RESUMO (TOTAL, ATIVOS, INATIVOS) -->
         <section class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
             <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Total de clientes</p>
@@ -76,7 +80,8 @@
             </article>
         </section>
 
-        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <!-- TABELA DE CLIENTES -->
+        <section id="clientes-tabela" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
@@ -100,6 +105,7 @@
         </section>
     </div>
 
+    <!-- MODAL: FORMULÁRIO PARA CADASTRAR NOVO CLIENTE -->
     <div id="modal-novo-cliente" class="fixed inset-0 z-50 items-center justify-center p-4">
       <div onclick="fecharModal()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
       <div class="relative z-10 w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
@@ -114,6 +120,7 @@
       </div>
     </div>
 
+    <!-- SCRIPT DE ABRIR/FECHAR O MODAL -->
     <script>
       function abrirModal(){document.getElementById('modal-novo-cliente').classList.add('show');document.body.classList.add('overflow-hidden');}
       function fecharModal(){document.getElementById('modal-novo-cliente').classList.remove('show');document.body.classList.remove('overflow-hidden');}
