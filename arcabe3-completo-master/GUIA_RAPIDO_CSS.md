@@ -1,41 +1,52 @@
 # Guia rápido: como alterar visual (centralizar, cores, etc.)
 
-Este projeto já carrega automaticamente o arquivo:
+Você pode usar um arquivo próprio de CSS (ex.: `staticfiles/css/custom_overrides.css`) para fazer ajustes visuais sem mexer na lógica do Django.
 
-- `staticfiles/css/custom_overrides.css`
+## 1) Como ativar seu CSS no projeto
 
-## Exemplos prontos
+No `templates/base.html`, adicione:
 
-No arquivo acima já deixei exemplos de:
-- centralizar títulos (login/cadastro)
-- mudar cor de botão
-- centralizar conteúdo da tabela de clientes
-- alterar fundo das páginas do financeiro
+```django
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/custom_overrides.css' %}" />
+```
 
-## Receita rápida para qualquer alteração
+> Dica: coloque o `<link>` antes de `</head>`.
 
-1. Abra o template da tela e identifique o `id` principal da página (ex.: `#clientes-page`).
-2. No `custom_overrides.css`, crie uma regra com esse seletor.
-3. Ajuste propriedades como `text-align`, `background-color`, `color`, `margin`, `padding`.
-4. Salve e recarregue no navegador.
-
-## Snippets úteis
+## 2) Exemplos simples
 
 ```css
-/* Centralizar um bloco */
-.meu-bloco {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Centralizar texto de um título */
+h1 {
+  text-align: center;
 }
 
-/* Trocar cor de texto */
-#clientes-header h1 {
+/* Mudar cor de botões de submit */
+button[type="submit"] {
+  background: #7c3aed;
+  color: #fff;
+}
+
+/* Centralizar conteúdo de tabelas */
+table th,
+table td {
+  text-align: center;
+}
+```
+
+## 3) Receita rápida para qualquer alteração
+
+1. Abra a página no navegador.
+2. Clique com botão direito no elemento > **Inspecionar**.
+3. Copie uma classe/estrutura do elemento.
+4. Crie a regra no `custom_overrides.css`.
+5. Salve e atualize a página (`Ctrl + F5`).
+
+## 4) Exemplo de seletor mais específico
+
+```css
+/* Exemplo: só o título principal da tela de clientes */
+header h1 {
   color: #1d4ed8;
-}
-
-/* Trocar cor de fundo */
-#clientes-page {
-  background: #f8fafc;
 }
 ```

@@ -4,16 +4,13 @@
 {% block 'title' %}Cadastro | Painel Jurídico{% endblock 'title' %}
 
 {% block 'body' %}
-    <!-- ESTRUTURA PRINCIPAL DA TELA DE CADASTRO -->
-    <div id="cadastro-page" class="mx-auto grid min-h-screen max-w-6xl grid-cols-1 lg:grid-cols-2">
-        <!-- COLUNA DA ESQUERDA: FORMULÁRIO DE CADASTRO -->
+    <div class="mx-auto grid min-h-screen max-w-6xl grid-cols-1 lg:grid-cols-2">
         <section class="flex items-center px-6 py-10 sm:px-10 lg:px-14">
             <div class="w-full rounded-3xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
                 <img src="{% static 'logo.webp' %}" alt="Logo do Painel Jurídico" class="h-12 w-auto" />
-                <h1 id="cadastro-titulo" class="mt-6 text-2xl font-bold text-slate-900">Criar nova conta</h1>
+                <h1 class="mt-6 text-2xl font-bold text-slate-900">Criar nova conta</h1>
                 <p class="mt-2 text-sm text-slate-500">Preencha os dados para começar a usar o painel.</p>
 
-                <!-- ALERTAS/MENSAGENS DE CADASTRO -->
                 {% if messages %}
                     <div class="mt-4 space-y-2">
                         {% for message in messages %}
@@ -22,7 +19,6 @@
                     </div>
                 {% endif %}
 
-                <!-- FORMULÁRIO (USUÁRIO + SENHA + CONFIRMAÇÃO) -->
                 <form action="{% url 'cadastro' %}" method="POST" class="mt-8 space-y-5">
                     {% csrf_token %}
                     <div>
@@ -66,7 +62,6 @@
             </div>
         </section>
 
-        <!-- COLUNA DA DIREITA: BANNER/INFORMAÇÕES VISUAIS -->
         <aside class="relative hidden lg:block">
             <img src="{% static 'banner.jpg' %}" alt="Banner institucional" class="h-full w-full object-cover" />
             <div class="absolute inset-0 bg-slate-900/45"></div>

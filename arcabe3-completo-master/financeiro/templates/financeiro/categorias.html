@@ -1,14 +1,12 @@
 {% extends 'base.html' %}
 {% block 'title' %}Financeiro | Categorias{% endblock %}
 {% block 'body' %}
-<!-- TELA DE CATEGORIAS FINANCEIRAS -->
-<div id="financeiro-categorias-page" class="mx-auto max-w-4xl p-6 md:p-8">
+<div class="mx-auto max-w-4xl p-6 md:p-8">
     <div class="mb-6 flex items-center justify-between">
         <h1 class="text-3xl font-bold">Categorias</h1>
         <a class="theme-link" href="{% url 'financeiro_dashboard' %}">← Dashboard</a>
     </div>
 
-    <!-- FORMULÁRIO DE NOVA CATEGORIA (APENAS PERFIL FULL) -->
     {% if role == 'FULL' %}
     <form method="post" class="theme-card mb-6 grid gap-3 rounded-xl p-4 md:grid-cols-2">
         {% csrf_token %}
@@ -20,7 +18,6 @@
     </form>
     {% endif %}
 
-    <!-- LISTA DE CATEGORIAS CADASTRADAS -->
     <div class="theme-card rounded-xl p-4">
         <ul class="space-y-2">
             {% for c in categorias %}
