@@ -7,44 +7,44 @@
     <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-3xl font-bold tracking-tight">Financeiro • Dashboard</h1>
-            <p class="theme-muted">Visão geral do fluxo financeiro da organização.</p>
+            <p class="text-slate-500">Visão geral do fluxo financeiro da organização.</p>
         </div>
         <nav class="flex flex-wrap items-center gap-2 text-sm">
-            <a class="theme-link" href="{% url 'clientes' %}">Clientes</a>
-            <span class="theme-muted">•</span>
-            <a class="theme-link" href="{% url 'financeiro_lancamentos' %}">Lançamentos</a>
-            <span class="theme-muted">•</span>
-            <a class="theme-link" href="{% url 'financeiro_contas' %}">Contas</a>
-            <span class="theme-muted">•</span>
-            <a class="theme-link" href="{% url 'financeiro_categorias' %}">Categorias</a>
-            <span class="theme-muted">•</span>
-            <a class="theme-link" href="{% url 'financeiro_relatorios' %}">Relatórios</a>
+            <a class="font-semibold text-teal-700 hover:text-teal-600" href="{% url 'clientes' %}">Clientes</a>
+            <span class="text-slate-500">•</span>
+            <a class="font-semibold text-teal-700 hover:text-teal-600" href="{% url 'financeiro_lancamentos' %}">Lançamentos</a>
+            <span class="text-slate-500">•</span>
+            <a class="font-semibold text-teal-700 hover:text-teal-600" href="{% url 'financeiro_contas' %}">Contas</a>
+            <span class="text-slate-500">•</span>
+            <a class="font-semibold text-teal-700 hover:text-teal-600" href="{% url 'financeiro_categorias' %}">Categorias</a>
+            <span class="text-slate-500">•</span>
+            <a class="font-semibold text-teal-700 hover:text-teal-600" href="{% url 'financeiro_relatorios' %}">Relatórios</a>
         </nav>
     </div>
 
     <!-- CARDS DE INDICADORES PRINCIPAIS -->
     <section class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <article class="theme-card rounded-2xl p-5 shadow-sm">
-            <p class="text-sm theme-muted">Receitas no mês</p>
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm text-slate-500">Receitas no mês</p>
             <p class="mt-2 text-2xl font-bold text-emerald-500">R$ {{ receitas_mes }}</p>
         </article>
-        <article class="theme-card rounded-2xl p-5 shadow-sm">
-            <p class="text-sm theme-muted">Despesas no mês</p>
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm text-slate-500">Despesas no mês</p>
             <p class="mt-2 text-2xl font-bold text-rose-500">R$ {{ despesas_mes }}</p>
         </article>
-        <article class="theme-card rounded-2xl p-5 shadow-sm">
-            <p class="text-sm theme-muted">A pagar (vencido)</p>
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm text-slate-500">A pagar (vencido)</p>
             <p class="mt-2 text-2xl font-bold">{{ a_pagar }}</p>
         </article>
-        <article class="theme-card rounded-2xl p-5 shadow-sm">
-            <p class="text-sm theme-muted">Projeção de fluxo</p>
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm text-slate-500">Projeção de fluxo</p>
             <p class="mt-2 text-2xl font-bold text-cyan-500">R$ {{ projecao }}</p>
         </article>
     </section>
 
     <!-- BLOCO DE GRÁFICOS/COMPARATIVOS -->
     <section class="mt-6 grid gap-6 lg:grid-cols-5">
-        <article class="theme-card rounded-2xl p-5 lg:col-span-3 shadow-sm">
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 lg:col-span-3 shadow-sm">
             <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-lg font-semibold">Receitas x Despesas por mês</h2>
                 <div class="flex items-center gap-3 text-xs">
@@ -57,7 +57,7 @@
                     <div class="rounded-xl border border-slate-200/70 p-3">
                         <div class="mb-2 flex items-center justify-between text-sm">
                             <p class="font-semibold">{{ item.label }}</p>
-                            <p class="theme-muted">Comparativo mensal</p>
+                            <p class="text-slate-500">Comparativo mensal</p>
                         </div>
                         <div class="space-y-2">
                             <div>
@@ -84,38 +84,38 @@
             </div>
         </article>
 
-        <article class="theme-card rounded-2xl p-5 lg:col-span-2 shadow-sm">
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 lg:col-span-2 shadow-sm">
             <h2 class="text-lg font-semibold">Despesas por categoria</h2>
             <div class="mt-4 space-y-3">
                 {% for item in top_categorias %}
                     <div class="rounded-lg border border-slate-200/70 p-3">
                         <div class="mb-1 flex items-center justify-between text-sm">
                             <span class="font-medium">{{ item.categoria__nome|default:'Sem categoria' }}</span>
-                            <span class="theme-muted">R$ {{ item.total }}</span>
+                            <span class="text-slate-500">R$ {{ item.total }}</span>
                         </div>
                         <div class="h-2.5 rounded-full bg-slate-200/80">
                             <div class="h-2.5 rounded-full bg-gradient-to-r from-indigo-400 to-violet-500" style="width:{% widthratio item.total max_categoria 100 %}%"></div>
                         </div>
                     </div>
                 {% empty %}
-                    <p class="theme-muted">Sem dados de despesas por categoria ainda.</p>
+                    <p class="text-slate-500">Sem dados de despesas por categoria ainda.</p>
                 {% endfor %}
             </div>
         </article>
     </section>
 
     <!-- LISTA DE SALDOS POR CONTA -->
-    <section class="mt-6 theme-card rounded-2xl p-5 shadow-sm">
+    <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 class="text-lg font-semibold">Saldos por conta</h2>
         <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {% for conta, saldo in saldos %}
                 <div class="rounded-xl border border-slate-300/60 p-4">
                     <p class="font-semibold">{{ conta.nome }}</p>
-                    <p class="theme-muted text-sm">{{ conta.tipo }}</p>
+                    <p class="text-slate-500 text-sm">{{ conta.tipo }}</p>
                     <p class="mt-2 text-xl font-bold">R$ {{ saldo }}</p>
                 </div>
             {% empty %}
-                <p class="theme-muted">Nenhuma conta cadastrada.</p>
+                <p class="text-slate-500">Nenhuma conta cadastrada.</p>
             {% endfor %}
         </div>
     </section>
