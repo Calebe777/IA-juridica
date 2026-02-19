@@ -194,3 +194,11 @@ def webhook_gateway(request):
         LancamentoFinanceiro.objects.filter(gateway_external_id=external_id).update(gateway_status=status)
         return JsonResponse({'ok': True})
     return JsonResponse({'ok': False}, status=400)
+
+
+@login_required(login_url='login')
+@finance_view_required
+def financeiro_juridico(request):
+    from .juridico_views import financeiro_juridico as juridico_handler
+
+    return juridico_handler(request)
