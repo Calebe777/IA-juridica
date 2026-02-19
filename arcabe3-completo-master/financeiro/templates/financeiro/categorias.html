@@ -5,31 +5,31 @@
 <div class="mx-auto max-w-4xl p-6 md:p-8">
     <div class="mb-6 flex items-center justify-between">
         <h1 class="text-3xl font-bold">Categorias</h1>
-        <a class="theme-link" href="{% url 'financeiro_dashboard' %}">← Dashboard</a>
+        <a class="font-semibold text-teal-700 hover:text-teal-600" href="{% url 'financeiro_dashboard' %}">← Dashboard</a>
     </div>
 
     <!-- FORMULÁRIO DE NOVA CATEGORIA (APENAS PERFIL FULL) -->
     {% if role == 'FULL' %}
-    <form method="post" class="theme-card mb-6 grid gap-3 rounded-xl p-4 md:grid-cols-2">
+    <form method="post" class="rounded-xl border border-slate-200 bg-white mb-6 grid gap-3 p-4 md:grid-cols-2">
         {% csrf_token %}
-        <input class="theme-input" name="nome" placeholder="Nome da categoria" required>
-        <select class="theme-input" name="tipo"><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option></select>
-        <input class="theme-input" name="grupo_dre" placeholder="Grupo DRE">
+        <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" name="nome" placeholder="Nome da categoria" required>
+        <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" name="tipo"><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option></select>
+        <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" name="grupo_dre" placeholder="Grupo DRE">
         <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="nao_entrar_dre"> Não entra no DRE</label>
-        <button class="theme-btn" type="submit">Criar categoria</button>
+        <button class="inline-flex items-center justify-center rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white hover:bg-teal-600" type="submit">Criar categoria</button>
     </form>
     {% endif %}
 
     <!-- LISTA DE CATEGORIAS CADASTRADAS -->
-    <div class="theme-card rounded-xl p-4">
+    <div class="rounded-xl border border-slate-200 bg-white p-4">
         <ul class="space-y-2">
             {% for c in categorias %}
                 <li class="rounded-lg border border-slate-300/60 p-3">
                     <p class="font-semibold">{{ c.nome }}</p>
-                    <p class="theme-muted text-sm">{{ c.tipo }}</p>
+                    <p class="text-slate-500 text-sm">{{ c.tipo }}</p>
                 </li>
             {% empty %}
-                <li class="theme-muted">Nenhuma categoria cadastrada.</li>
+                <li class="text-slate-500">Nenhuma categoria cadastrada.</li>
             {% endfor %}
         </ul>
     </div>

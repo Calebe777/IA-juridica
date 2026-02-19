@@ -5,31 +5,31 @@
 <div class="mx-auto max-w-7xl p-6 md:p-8">
     <div class="mb-6 flex items-center justify-between">
         <h1 class="text-3xl font-bold">Lançamentos</h1>
-        <a class="theme-link" href="{% url 'financeiro_dashboard' %}">← Voltar ao dashboard</a>
+        <a class="font-semibold text-teal-700 hover:text-teal-600" href="{% url 'financeiro_dashboard' %}">← Voltar ao dashboard</a>
     </div>
 
     <!-- FORMULÁRIO DE NOVO LANÇAMENTO (APENAS PERFIL FULL) -->
     {% if role == 'FULL' %}
-    <form method="post" class="theme-card mb-6 grid gap-3 rounded-xl p-4 md:grid-cols-2 xl:grid-cols-4">
+    <form method="post" class="rounded-xl border border-slate-200 bg-white mb-6 grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
         {% csrf_token %}
-        <input class="theme-input" name="descricao" placeholder="Descrição" required>
-        <input class="theme-input" name="valor" type="number" step="0.01" placeholder="Valor" required>
-        <input class="theme-input" name="vencimento" type="date" required>
-        <input class="theme-input" name="parcelas" type="number" min="1" value="1">
-        <select class="theme-input" name="tipo">
+        <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" name="descricao" placeholder="Descrição" required>
+        <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" name="valor" type="number" step="0.01" placeholder="Valor" required>
+        <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" name="vencimento" type="date" required>
+        <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" name="parcelas" type="number" min="1" value="1">
+        <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" name="tipo">
             <option value="RECEITA">Receita</option>
             <option value="DESPESA">Despesa</option>
             <option value="INTERNO">Registro Interno</option>
         </select>
-        <button class="theme-btn md:col-span-2 xl:col-span-1" type="submit">Salvar lançamento</button>
+        <button class="inline-flex items-center justify-center rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white hover:bg-teal-600 md:col-span-2 xl:col-span-1" type="submit">Salvar lançamento</button>
     </form>
     {% endif %}
 
     <!-- TABELA COM OS LANÇAMENTOS CADASTRADOS -->
-    <div class="theme-card overflow-auto rounded-xl p-2">
+    <div class="rounded-xl border border-slate-200 bg-white overflow-auto p-2">
         <table class="min-w-full text-sm">
             <thead>
-                <tr class="theme-muted text-left">
+                <tr class="text-slate-500 text-left">
                     <th class="p-3">Vencimento</th>
                     <th class="p-3">Descrição</th>
                     <th class="p-3">Tipo</th>
