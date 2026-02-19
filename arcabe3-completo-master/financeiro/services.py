@@ -107,3 +107,98 @@ def generate_recurring(reference_date=None):
         )
         created += 1
     return created
+
+
+
+def aplicar_indice_monetario(valor, indice):
+    taxas = {
+        'IPCA': Decimal('0.0450'),
+        'SELIC': Decimal('0.1075'),
+        'IGPM': Decimal('0.0325'),
+    }
+    taxa = taxas.get(indice, Decimal('0.0000'))
+    atualizado = (valor * (Decimal('1') + taxa)).quantize(Decimal('0.01'))
+    return atualizado, taxa
+
+
+def gerar_fatura_reembolso(organizacao, cliente, processo_referencia, vencimento, incluir_honorarios, user):
+    from .models import DespesaProcessual, FaturaFinanceira, FaturaItem, Honorario
+
+    despesas = DespesaProcessual.objects.filter(
+        organizacao=organizacao,
+        cliente=cliente,
+        processo_referencia=processo_referencia,
+        reembolsavel=True,
+        status_reembolso='PENDENTE',
+    )
+    fatura = FaturaFinanceira.objects.create(
+        organizacao=organizacao,
+        cliente=cliente,
+        processo_referencia=processo_referencia,
+        descricao=f'Reembolso de despesas - {processo_referencia}',
+        vencimento=vencimento,
+        incluir_honorarios=incluir_honorarios,
+        created_by=user,
+    )
+    total = Decimal('0.00')
+    for despesa in despesas:
+        FaturaItem.objects.create(
+            fatura=fatura,
+            tipo='DESPESA',
+            descricao=despesa.descricao,
+            valor=despesa.valor,
+            despesa=despesa,
+        )
+        despesa.status_reembolso = 'FATURADA'
+        despesa.save(update_fields=['status_reembolso'])
+        total += despesa.valor
+
+    if incluir_honorarios:
+        honorarios = Honorario.objects.filter(
+            organizacao=organizacao,
+            cliente=cliente,
+            processo_referencia=processo_referencia,
+            status='ATIVO',
+        )
+        for honorario in honorarios:
+            valor = honorario.valor_previsto
+            FaturaItem.objects.create(
+                fatura=fatura,
+                tipo='HONORARIO',
+                descricao=honorario.descricao or f'Honorário {honorario.get_tipo_display()}',
+                valor=valor,
+                honorario=honorario,
+            )
+            total += valor
+
+    fatura.valor_total = total
+    fatura.pix_qr_code = f'PIX|FATURA:{fatura.id}|VALOR:{total}'
+    fatura.linha_digitavel = f'34191.79001 {fatura.id:010d} {int(total * 100):010d}'
+    fatura.save(update_fields=['valor_total', 'pix_qr_code', 'linha_digitavel'])
+    return fatura
+
+
+def extrato_prestacao_contas(organizacao, cliente, processo_referencia):
+    from .models import AdiantamentoCliente, DespesaProcessual, Honorario
+
+    honorarios = list(Honorario.objects.filter(
+        organizacao=organizacao,
+        cliente=cliente,
+        processo_referencia=processo_referencia,
+    ).values('tipo', 'descricao', 'status', 'valor_contratado', 'percentual_exito', 'valor_causa'))
+    despesas = list(DespesaProcessual.objects.filter(
+        organizacao=organizacao,
+        cliente=cliente,
+        processo_referencia=processo_referencia,
+    ).values('categoria', 'descricao', 'valor', 'status_reembolso'))
+    adiantamentos = list(AdiantamentoCliente.objects.filter(
+        organizacao=organizacao,
+        cliente=cliente,
+        processo_referencia=processo_referencia,
+    ).values('valor_total', 'saldo_disponivel', 'descricao', 'created_at'))
+
+    return {
+        'honorarios': honorarios,
+        'despesas': despesas,
+        'adiantamentos': adiantamentos,
+    }
