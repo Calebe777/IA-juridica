@@ -134,12 +134,18 @@ def financeiro_juridico(request):
             'rentabilidade_por_caso': list(rentabilidade),
         })
     except (OperationalError, ProgrammingError) as exc:
-        return JsonResponse(
-            {
-                'ok': False,
-                'error': 'Estrutura do banco desatualizada para o módulo financeiro jurídico.',
-                'detail': str(exc),
-                'hint': 'Execute: python manage.py migrate financeiro',
-            },
-            status=503,
-        )
+        return JsonResponse({
+            'ok': False,
+            'role': role,
+            'error': 'Estrutura do banco desatualizada para o módulo financeiro jurídico.',
+            'detail': str(exc),
+            'hint': 'Execute: python manage.py migrate financeiro',
+            'honorarios': [],
+            'adiantamentos': [],
+            'despesas': [],
+            'projecao_90_dias': [],
+            'atualizacoes_monetarias': [],
+            'time_tracking': [],
+            'extrato_prestacao_contas': {},
+            'rentabilidade_por_caso': [],
+        })
