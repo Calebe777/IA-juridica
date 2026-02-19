@@ -118,7 +118,7 @@ class FinanceiroTests(TestCase):
         self.assertTrue(len(payload['honorarios']) >= 1)
 
 
-    @patch('financeiro.views.Honorario.objects.filter', side_effect=OperationalError('no such table: financeiro_honorario'))
+    @patch('financeiro.juridico_views.Honorario.objects.filter', side_effect=OperationalError('no such table: financeiro_honorario'))
     def test_endpoint_financeiro_juridico_retorna_503_se_migracao_pendente(self, _):
         self.client.login(username='full', password='123456')
         response = self.client.get(reverse('financeiro_juridico'))
