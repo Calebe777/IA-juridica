@@ -97,3 +97,159 @@ class FinancialAuditLog(models.Model):
     acao = models.CharField(max_length=32)
     detalhes = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Honorario(models.Model):
+    TIPO_PRO_LABORE = 'PRO_LABORE'
+    TIPO_EXITO = 'EXITO'
+    TIPO_SUCUMBENCIA = 'SUCUMBENCIA'
+    TIPO_MENSAL = 'MENSAL'
+    TIPO_CHOICES = [
+        (TIPO_PRO_LABORE, 'Pró-labore'),
+        (TIPO_EXITO, 'Êxito (ad exitum)'),
+        (TIPO_SUCUMBENCIA, 'Sucumbência'),
+        (TIPO_MENSAL, 'Mensal (retainer)'),
+    ]
+    STATUS_CHOICES = [
+        ('RASCUNHO', 'Rascunho'),
+        ('ATIVO', 'Ativo'),
+        ('ENCERRADO', 'Encerrado'),
+    ]
+
+    organizacao = models.ForeignKey(Organizacao, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    processo_referencia = models.CharField(max_length=120)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    descricao = models.CharField(max_length=255, blank=True)
+    valor_contratado = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal('0.00'))
+    percentual_exito = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))
+    valor_causa = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal('0.00'))
+    total_parcelas = models.PositiveIntegerField(default=1)
+    recorrente_mensal = models.BooleanField(default=False)
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='ATIVO')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=['organizacao', 'cliente', 'processo_referencia'])]
+
+    @property
+    def valor_previsto(self):
+        if self.tipo == self.TIPO_EXITO:
+            return (self.valor_causa * self.percentual_exito) / Decimal('100')
+        return self.valor_contratado
+
+
+class AdiantamentoCliente(models.Model):
+    organizacao = models.ForeignKey(Organizacao, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    processo_referencia = models.CharField(max_length=120, blank=True)
+    valor_total = models.DecimalField(max_digits=14, decimal_places=2)
+    saldo_disponivel = models.DecimalField(max_digits=14, decimal_places=2)
+    descricao = models.CharField(max_length=255, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class DespesaProcessual(models.Model):
+    CATEGORIA_CHOICES = [
+        ('TAXA', 'Taxa judicial'),
+        ('COPIA', 'Cópias'),
+        ('TRANSPORTE', 'Transporte'),
+        ('OUTROS', 'Outros'),
+    ]
+    STATUS_CHOICES = [('PENDENTE', 'Pendente'), ('FATURADA', 'Faturada'), ('REEMBOLSADA', 'Reembolsada')]
+
+    organizacao = models.ForeignKey(Organizacao, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    processo_referencia = models.CharField(max_length=120)
+    categoria = models.CharField(max_length=16, choices=CATEGORIA_CHOICES)
+    descricao = models.CharField(max_length=255)
+    valor = models.DecimalField(max_digits=14, decimal_places=2)
+    reembolsavel = models.BooleanField(default=True)
+    status_reembolso = models.CharField(max_length=12, choices=STATUS_CHOICES, default='PENDENTE')
+    comprovante = models.FileField(upload_to='financeiro/despesas/', null=True, blank=True)
+    adiantamento = models.ForeignKey(AdiantamentoCliente, on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class MovimentacaoAdiantamento(models.Model):
+    TIPO_CHOICES = [('CREDITO', 'Crédito'), ('USO', 'Uso em despesa'), ('ESTORNO', 'Estorno')]
+
+    organizacao = models.ForeignKey(Organizacao, on_delete=models.CASCADE)
+    adiantamento = models.ForeignKey(AdiantamentoCliente, on_delete=models.CASCADE, related_name='movimentacoes')
+    despesa = models.ForeignKey(DespesaProcessual, on_delete=models.SET_NULL, null=True, blank=True)
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
+    valor = models.DecimalField(max_digits=14, decimal_places=2)
+    observacao = models.CharField(max_length=255, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class FaturaFinanceira(models.Model):
+    STATUS_CHOICES = [('PENDENTE', 'Pendente'), ('PAGA', 'Paga'), ('ATRASADA', 'Atrasada'), ('CANCELADA', 'Cancelada')]
+    MEIO_CHOICES = [('BOLETO', 'Boleto'), ('PIX', 'Pix dinâmico'), ('CARTAO', 'Cartão de crédito')]
+
+    organizacao = models.ForeignKey(Organizacao, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    processo_referencia = models.CharField(max_length=120, blank=True)
+    descricao = models.CharField(max_length=255)
+    vencimento = models.DateField()
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='PENDENTE')
+    meio_pagamento = models.CharField(max_length=10, choices=MEIO_CHOICES, default='PIX')
+    incluir_honorarios = models.BooleanField(default=False)
+    valor_total = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal('0.00'))
+    linha_digitavel = models.CharField(max_length=120, blank=True)
+    pix_qr_code = models.TextField(blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class FaturaItem(models.Model):
+    TIPO_CHOICES = [('HONORARIO', 'Honorário'), ('DESPESA', 'Despesa')]
+
+    fatura = models.ForeignKey(FaturaFinanceira, on_delete=models.CASCADE, related_name='itens')
+    tipo = models.CharField(max_length=12, choices=TIPO_CHOICES)
+    descricao = models.CharField(max_length=255)
+    valor = models.DecimalField(max_digits=14, decimal_places=2)
+    honorario = models.ForeignKey(Honorario, on_delete=models.SET_NULL, null=True, blank=True)
+    despesa = models.ForeignKey(DespesaProcessual, on_delete=models.SET_NULL, null=True, blank=True)
+
+
+class SplitPagamentoRegra(models.Model):
+    organizacao = models.ForeignKey(Organizacao, on_delete=models.CASCADE)
+    nome_parceiro = models.CharField(max_length=120)
+    percentual = models.DecimalField(max_digits=5, decimal_places=2)
+    ativo = models.BooleanField(default=True)
+
+
+class AtualizacaoMonetaria(models.Model):
+    INDICE_CHOICES = [('IPCA', 'IPCA'), ('SELIC', 'SELIC'), ('IGPM', 'IGPM')]
+
+    organizacao = models.ForeignKey(Organizacao, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    processo_referencia = models.CharField(max_length=120)
+    indice = models.CharField(max_length=10, choices=INDICE_CHOICES)
+    valor_original = models.DecimalField(max_digits=14, decimal_places=2)
+    valor_atualizado = models.DecimalField(max_digits=14, decimal_places=2)
+    taxa_aplicada = models.DecimalField(max_digits=8, decimal_places=4)
+    observacao = models.CharField(max_length=255, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class TimeTrackingFinanceiro(models.Model):
+    organizacao = models.ForeignKey(Organizacao, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    processo_referencia = models.CharField(max_length=120)
+    descricao = models.CharField(max_length=255)
+    horas = models.DecimalField(max_digits=8, decimal_places=2)
+    valor_hora = models.DecimalField(max_digits=10, decimal_places=2)
+    faturado = models.BooleanField(default=False)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def valor_total(self):
+        return self.horas * self.valor_hora

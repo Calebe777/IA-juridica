@@ -11,4 +11,5 @@ urlpatterns = [
     path('exportar/<str:formato>/', views.exportar, name='financeiro_exportar'),
     path('recibo/<int:lancamento_id>/', views.gerar_recibo, name='financeiro_recibo'),
     path('webhook/gateway/', views.webhook_gateway, name='financeiro_webhook_gateway'),
+    path('juridico/', views.financeiro_juridico, name='financeiro_juridico'),
 ]
