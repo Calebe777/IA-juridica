@@ -3,7 +3,8 @@ from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.db import OperationalError, ProgrammingError
-from django.db.models import Case, DecimalField, Sum, When
+from django.db.models import Case, DecimalField, ExpressionWrapper, F, Sum, Value, When
+from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 
 from usuarios.models import Cliente
@@ -114,12 +115,38 @@ def financeiro_juridico(request):
         ).values('tipo').annotate(total=Sum('valor'))
 
         rentabilidade = (
-            LancamentoFinanceiro.objects.filter(organizacao=org)
+            LancamentoFinanceiro.objects.filter(
+                organizacao=org,
+                cliente__isnull=False,
+            )
+            .exclude(processo_referencia__isnull=True)
+            .exclude(processo_referencia='')
             .values('cliente__nome', 'processo_referencia')
             .annotate(
-                receitas=Sum(Case(When(tipo='RECEITA', then='valor'), default=0, output_field=DecimalField())),
-                despesas=Sum(Case(When(tipo='DESPESA', then='valor'), default=0, output_field=DecimalField())),
+                receitas=Coalesce(
+                    Sum(
+                        Case(
+                            When(tipo='RECEITA', then='valor'),
+                            default=Value(0),
+                            output_field=DecimalField(),
+                        )
+                    ),
+                    Value(0),
+                    output_field=DecimalField(),
+                ),
+                despesas=Coalesce(
+                    Sum(
+                        Case(
+                            When(tipo='DESPESA', then=-F('valor')),
+                            default=Value(0),
+                            output_field=DecimalField(),
+                        )
+                    ),
+                    Value(0),
+                    output_field=DecimalField(),
+                ),
             )
+            .annotate(rentabilidade=ExpressionWrapper(F('receitas') - F('despesas'), output_field=DecimalField()))
         )
 
         return JsonResponse({
