@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, DecimalException
 
 from django.contrib.auth.decorators import login_required
 from django.db import OperationalError, ProgrammingError
@@ -20,6 +20,15 @@ from .models import (
 from .permissions import finance_view_required, get_financial_role
 from .services import aplicar_indice_monetario, extrato_prestacao_contas, gerar_fatura_reembolso
 
+def _cliente_da_organizacao(organizacao, cliente_id):
+    cliente = Cliente.objects.filter(organizacao=organizacao, id=cliente_id).first()
+    if not cliente:
+        raise ValueError('Cliente inválido para a organização do usuário.')
+    return cliente
+
+
+def _payload_invalido(role, detail):
+    return JsonResponse({'ok': False, 'role': role, 'error': 'Dados inválidos para operação financeira jurídica.', 'detail': detail}, status=400)
 
 @login_required(login_url='login')
 @finance_view_required
@@ -32,7 +41,7 @@ def financeiro_juridico(request):
             if acao == 'honorario':
                 Honorario.objects.create(
                     organizacao=org,
-                    cliente_id=request.POST['cliente_id'],
+                    cliente=_cliente_da_organizacao(org, request.POST['cliente_id']),
                     processo_referencia=request.POST['processo_referencia'],
                     tipo=request.POST['tipo'],
                     descricao=request.POST.get('descricao', ''),
@@ -47,7 +56,7 @@ def financeiro_juridico(request):
                 valor = request.POST.get('valor_total')
                 AdiantamentoCliente.objects.create(
                     organizacao=org,
-                    cliente_id=request.POST['cliente_id'],
+                    cliente=_cliente_da_organizacao(org, request.POST['cliente_id']),
                     processo_referencia=request.POST.get('processo_referencia', ''),
                     valor_total=valor,
                     saldo_disponivel=valor,
@@ -57,7 +66,7 @@ def financeiro_juridico(request):
             elif acao == 'despesa':
                 DespesaProcessual.objects.create(
                     organizacao=org,
-                    cliente_id=request.POST['cliente_id'],
+                    cliente=_cliente_da_organizacao(org, request.POST['cliente_id']),
                     processo_referencia=request.POST['processo_referencia'],
                     categoria=request.POST['categoria'],
                     descricao=request.POST['descricao'],
@@ -68,7 +77,7 @@ def financeiro_juridico(request):
             elif acao == 'faturar_reembolso':
                 gerar_fatura_reembolso(
                     org,
-                    Cliente.objects.get(id=request.POST['cliente_id']),
+                    _cliente_da_organizacao(org, request.POST['cliente_id']),
                     request.POST['processo_referencia'],
                     datetime.strptime(request.POST['vencimento'], '%Y-%m-%d').date(),
                     request.POST.get('incluir_honorarios') == 'true',
@@ -79,7 +88,7 @@ def financeiro_juridico(request):
                 valor_atualizado, taxa = aplicar_indice_monetario(Decimal(valor_original), request.POST['indice'])
                 AtualizacaoMonetaria.objects.create(
                     organizacao=org,
-                    cliente_id=request.POST['cliente_id'],
+                    cliente=_cliente_da_organizacao(org, request.POST['cliente_id']),
                     processo_referencia=request.POST['processo_referencia'],
                     indice=request.POST['indice'],
                     valor_original=valor_original,
@@ -91,7 +100,7 @@ def financeiro_juridico(request):
             elif acao == 'time_tracking':
                 TimeTrackingFinanceiro.objects.create(
                     organizacao=org,
-                    cliente_id=request.POST['cliente_id'],
+                    cliente=_cliente_da_organizacao(org, request.POST['cliente_id']),
                     processo_referencia=request.POST['processo_referencia'],
                     descricao=request.POST['descricao'],
                     horas=request.POST['horas'],
@@ -103,7 +112,7 @@ def financeiro_juridico(request):
         processo_referencia = request.GET.get('processo_referencia', '')
         extrato = {}
         if cliente_id and processo_referencia:
-            extrato = extrato_prestacao_contas(org, Cliente.objects.get(id=cliente_id), processo_referencia)
+            extrato = extrato_prestacao_contas(org, _cliente_da_organizacao(org, cliente_id), processo_referencia)
 
         hoje = date.today()
         futuro = hoje + timedelta(days=90)
@@ -137,7 +146,7 @@ def financeiro_juridico(request):
                 despesas=Coalesce(
                     Sum(
                         Case(
-                            When(tipo='DESPESA', then=-F('valor')),
+                            When(tipo='DESPESA', then='valor'),
                             default=Value(0),
                             output_field=DecimalField(),
                         )
@@ -160,6 +169,8 @@ def financeiro_juridico(request):
             'extrato_prestacao_contas': extrato,
             'rentabilidade_por_caso': list(rentabilidade),
         })
+    except (ValueError, KeyError, DecimalException) as exc:
+        return _payload_invalido(role, str(exc))
     except (OperationalError, ProgrammingError) as exc:
         return JsonResponse({
             'ok': False,

@@ -101,6 +101,66 @@ class FinanceiroTests(TestCase):
         self.assertEqual(fatura.valor_total, Decimal('120.00'))
         self.assertTrue(fatura.pix_qr_code.startswith('PIX|FATURA'))
 
+
+    def test_financeiro_juridico_bloqueia_cliente_de_outra_organizacao(self):
+        outro_user = User.objects.create_user(username='other', password='123456')
+        outra_org = get_or_create_user_organization(outro_user)
+        cliente_outro = Cliente.objects.create(
+            nome='Cliente 2', email='b@b.com', tipo='PF', status=True, user=outro_user, organizacao=outra_org
+        )
+
+        self.client.login(username='full', password='123456')
+        response = self.client.post(reverse('financeiro_juridico'), {
+            'acao': 'honorario',
+            'cliente_id': cliente_outro.id,
+            'processo_referencia': 'PROC-99',
+            'tipo': 'PRO_LABORE',
+            'descricao': 'Tentativa inválida',
+            'valor_contratado': '300.00',
+        })
+
+        self.assertEqual(response.status_code, 400)
+        payload = response.json()
+        self.assertFalse(payload['ok'])
+
+    def test_financeiro_juridico_calcula_rentabilidade_subtraindo_despesas(self):
+        LancamentoFinanceiro.objects.create(
+            organizacao=self.org,
+            tipo='RECEITA',
+            status='PAGO',
+            valor=Decimal('500.00'),
+            vencimento=date.today(),
+            competencia='2026-02',
+            descricao='Receita do caso',
+            conta=self.conta,
+            categoria=self.categoria,
+            cliente=self.cliente,
+            processo_referencia='PROC-RENT',
+            created_by=self.user,
+        )
+        LancamentoFinanceiro.objects.create(
+            organizacao=self.org,
+            tipo='DESPESA',
+            status='PAGO',
+            valor=Decimal('120.00'),
+            vencimento=date.today(),
+            competencia='2026-02',
+            descricao='Despesa do caso',
+            conta=self.conta,
+            categoria=self.categoria,
+            cliente=self.cliente,
+            processo_referencia='PROC-RENT',
+            created_by=self.user,
+        )
+
+        self.client.login(username='full', password='123456')
+        response = self.client.get(reverse('financeiro_juridico'))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        caso = next(item for item in payload['rentabilidade_por_caso'] if item['processo_referencia'] == 'PROC-RENT')
+        self.assertEqual(Decimal(str(caso['rentabilidade'])), Decimal('380.00'))
+
     def test_endpoint_financeiro_juridico(self):
         self.client.login(username='full', password='123456')
         response = self.client.post(reverse('financeiro_juridico'), {
