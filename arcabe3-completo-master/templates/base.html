@@ -1,46 +1,82 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{% block 'title' %}Painel Jurídico{% endblock 'title' %}</title>
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-        {% block 'head' %}
-        {% endblock 'head' %}
-    </head>
-    <body id="app-body" class="min-h-screen bg-slate-100 text-slate-900 antialiased transition-colors duration-200">
-        <button id="theme-toggle" class="fixed right-4 top-4 z-50 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100" type="button">🌙 Modo escuro</button>
-        {% block 'body' %}
-        {% endblock 'body' %}
-        <script>
-            (() => {
-                const root = document.documentElement;
-                const body = document.getElementById('app-body');
-                const button = document.getElementById('theme-toggle');
-                const saved = localStorage.getItem('painel-theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block 'title' %}Painel Jurídico{% endblock 'title' %}</title>
+    <link rel="stylesheet" href="{% static 'css/app-dashboard.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    {% block 'head' %}{% endblock 'head' %}
+</head>
+<body>
+{% if request.user.is_authenticated %}
+<div class="app-shell" id="appShell">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar__brand">
+            <span class="sidebar__logo">PJ</span>
+            <div>
+                <strong>Painel Jurídico</strong>
+                <small>Gestão Legal</small>
+            </div>
+        </div>
 
-                const applyTheme = (theme) => {
-                    const dark = theme === 'dark';
-                    root.setAttribute('data-theme', theme);
-                    body.className = dark
-                        ? 'min-h-screen bg-slate-950 text-slate-100 antialiased transition-colors duration-200'
-                        : 'min-h-screen bg-slate-100 text-slate-900 antialiased transition-colors duration-200';
+        <nav class="sidebar__menu">
+            <a href="{% url 'financeiro_dashboard' %}" class="menu-item {% if '/financeiro/' in request.path and '/financeiro/lancamentos/' not in request.path and '/financeiro/contas/' not in request.path and '/financeiro/categorias/' not in request.path and '/financeiro/relatorios/' not in request.path %}is-active{% endif %}">Dashboard</a>
+            <a href="{% url 'cadastro' %}" class="menu-item {% if '/usuarios/cadastro/' in request.path %}is-active{% endif %}">Usuários</a>
+            <a href="{% url 'clientes' %}" class="menu-item {% if '/usuarios/clientes/' in request.path %}is-active{% endif %}">Clientes</a>
+            <a href="{% url 'financeiro_lancamentos' %}" class="menu-item {% if '/financeiro/lancamentos/' in request.path %}is-active{% endif %}">Processos</a>
+            <a href="{% url 'financeiro_contas' %}" class="menu-item {% if '/financeiro/contas/' in request.path %}is-active{% endif %}">Agenda &amp; Prazos</a>
+            <a href="{% url 'financeiro_dashboard' %}" class="menu-item {% if '/financeiro/' in request.path %}is-active{% endif %}">Financeiro</a>
+            <a href="{% url 'clientes' %}" class="menu-item">Documentos</a>
+            <a href="{% url 'financeiro_relatorios' %}" class="menu-item {% if '/financeiro/relatorios/' in request.path %}is-active{% endif %}">Relatórios</a>
+            <a href="/admin/" class="menu-item">Configurações</a>
+            <a href="{% url 'login' %}" class="menu-item menu-item--danger">Sair</a>
+        </nav>
+    </aside>
 
-                    button.className = dark
-                        ? 'fixed right-4 top-4 z-50 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-100 shadow-sm transition hover:bg-slate-700'
-                        : 'fixed right-4 top-4 z-50 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100';
+    <div class="app-main">
+        <header class="topbar">
+            <button class="icon-btn only-mobile" id="sidebarToggle" type="button" aria-label="Abrir menu">☰</button>
+            <div class="topbar__search">
+                <input type="search" placeholder="Buscar cliente, processo, documento..." />
+            </div>
+            <div class="topbar__actions">
+                <select aria-label="Filtro de período">
+                    <option>Últimos 7 dias</option>
+                    <option selected>Últimos 30 dias</option>
+                    <option>Este trimestre</option>
+                </select>
+                <div class="topbar__profile">
+                    <span>{{ request.user.username|default:'Usuário' }}</span>
+                </div>
+            </div>
+        </header>
 
-                    button.textContent = dark ? '☀️ Modo claro' : '🌙 Modo escuro';
-                };
+        <main class="page-content">
+{% else %}
+<main class="auth-shell">
+{% endif %}
 
-                applyTheme(saved || (prefersDark ? 'dark' : 'light'));
-                button.addEventListener('click', () => {
-                    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-                    localStorage.setItem('painel-theme', next);
-                    applyTheme(next);
-                });
-            })();
-        </script>
-    </body>
+{% block 'body' %}{% endblock 'body' %}
+
+{% if request.user.is_authenticated %}
+        </main>
+    </div>
+</div>
+{% else %}
+</main>
+{% endif %}
+
+<script>
+(() => {
+    const sidebar = document.getElementById('sidebar');
+    const button = document.getElementById('sidebarToggle');
+    if (sidebar && button) {
+        button.addEventListener('click', () => sidebar.classList.toggle('is-open'));
+    }
+})();
+</script>
+{% block 'scripts' %}{% endblock 'scripts' %}
+</body>
 </html>
