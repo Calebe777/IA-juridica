@@ -120,3 +120,9 @@ def cliente(request, id):
         documentos.save()
 
         return redirect(reverse('cliente', kwargs={'id': cliente.id}))
+
+
+
+def logout_view(request):
+    auth.logout(request)
+    return redirect('login')

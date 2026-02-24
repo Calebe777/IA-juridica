@@ -8,8 +8,8 @@
 {% block 'body' %}
 <section class="dashboard-grid">
     <header>
-        <h1 class="section-title">Dashboard</h1>
-        <p class="section-subtitle">Visão consolidada da operação jurídica e financeira.</p>
+        <h1 class="section-title">Dashboard Jurídico</h1>
+        <p class="section-subtitle">Painel completo com visão de processos, prazos, status e resultados financeiros.</p>
     </header>
 
     <section class="kpi-grid">
@@ -21,7 +21,7 @@
         <article class="card">
             <div class="kpi-head"><span>⏳ Prazos nos Próximos 7 dias</span><span>📅</span></div>
             <div class="kpi-value">{{ a_pagar|default:23 }}</div>
-            <small class="kpi-trend down">+3 alertas críticos</small>
+            <small class="kpi-trend down">3 alertas críticos</small>
         </article>
         <article class="card">
             <div class="kpi-head"><span>🤝 Atendimentos do Período</span><span>📞</span></div>
@@ -43,6 +43,30 @@
         <article class="card donut-wrap">
             <h2>Status dos Processos</h2>
             <canvas id="processStatusChart" height="170"></canvas>
+        </article>
+    </section>
+
+    <section class="ops-grid">
+        <article class="card">
+            <h2>Funções rápidas do escritório</h2>
+            <p class="section-subtitle">Acesso direto para tarefas essenciais do dia a dia.</p>
+            <div class="quick-actions">
+                <button class="quick-action" type="button">+ Novo processo</button>
+                <button class="quick-action" type="button">+ Novo cliente</button>
+                <button class="quick-action" type="button">Lançar audiência</button>
+                <button class="quick-action" type="button">Gerar relatório</button>
+            </div>
+        </article>
+        <article class="card">
+            <h2>Resumo de status</h2>
+            <table>
+                <tbody>
+                    <tr><td>Em andamento</td><td><strong>55</strong></td></tr>
+                    <tr><td>Aguardando decisão</td><td><strong>30</strong></td></tr>
+                    <tr><td>Concluídos no mês</td><td><strong>15</strong></td></tr>
+                    <tr><td>Risco alto</td><td><strong>7</strong></td></tr>
+                </tbody>
+            </table>
         </article>
     </section>
 
@@ -105,8 +129,8 @@ if (lineCtx) {
             datasets: [{
                 label: 'Casos com avanço',
                 data: [34, 39, 37, 45, 41, 48, 46],
-                borderColor: '#ff7b24',
-                backgroundColor: 'rgba(255, 123, 36, 0.16)',
+                borderColor: '#6d28d9',
+                backgroundColor: 'rgba(109, 40, 217, 0.16)',
                 fill: true,
                 tension: 0.3
             }]
@@ -114,7 +138,7 @@ if (lineCtx) {
         options: {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: '#eef2f7' } }, x: { grid: { display: false } } }
+            scales: { y: { beginAtZero: true, grid: { color: '#efeafe' } }, x: { grid: { display: false } } }
         }
     });
 }
@@ -127,7 +151,7 @@ if (donutCtx) {
             labels: ['Ativo', 'Aguardando decisão', 'Concluído'],
             datasets: [{
                 data: [55, 30, 15],
-                backgroundColor: ['#c4b5fd', '#ddd6fe', '#ede9fe'],
+                backgroundColor: ['#6d28d9', '#8b5cf6', '#c4b5fd'],
                 borderWidth: 0
             }]
         },
