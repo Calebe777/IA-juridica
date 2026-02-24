@@ -3,6 +3,16 @@
 
 {% block 'head' %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .chart-canvas-box {
+        position: relative;
+        height: 280px;
+    }
+
+    .chart-canvas-box--donut {
+        height: 240px;
+    }
+</style>
 {% endblock 'head' %}
 
 {% block 'body' %}
@@ -38,11 +48,15 @@
     <section class="main-charts">
         <article class="card chart-wrap">
             <h2>Andamento de Casos</h2>
-            <canvas id="casesProgressChart" height="120"></canvas>
+            <div class="chart-canvas-box">
+                <canvas id="casesProgressChart"></canvas>
+            </div>
         </article>
         <article class="card donut-wrap">
             <h2>Status dos Processos</h2>
-            <canvas id="processStatusChart" height="170"></canvas>
+            <div class="chart-canvas-box chart-canvas-box--donut">
+                <canvas id="processStatusChart"></canvas>
+            </div>
         </article>
     </section>
 
@@ -51,10 +65,10 @@
             <h2>Funções rápidas do escritório</h2>
             <p class="section-subtitle">Acesso direto para tarefas essenciais do dia a dia.</p>
             <div class="quick-actions">
-                <button class="quick-action" type="button">+ Novo processo</button>
-                <button class="quick-action" type="button">+ Novo cliente</button>
-                <button class="quick-action" type="button">Lançar audiência</button>
-                <button class="quick-action" type="button">Gerar relatório</button>
+                <a class="quick-action" href="{% url 'financeiro_lancamentos' %}">+ Novo processo</a>
+                <a class="quick-action" href="{% url 'clientes' %}">+ Novo cliente</a>
+                <a class="quick-action" href="{% url 'financeiro_contas' %}">Lançar audiência</a>
+                <a class="quick-action" href="{% url 'financeiro_relatorios' %}">Gerar relatório</a>
             </div>
         </article>
         <article class="card">
@@ -118,10 +132,16 @@
 </section>
 {% endblock %}
 
+
 {% block 'scripts' %}
 <script>
 const lineCtx = document.getElementById('casesProgressChart');
 if (lineCtx) {
+    const existingLineChart = Chart.getChart(lineCtx);
+    if (existingLineChart) {
+        existingLineChart.destroy();
+    }
+
     new Chart(lineCtx, {
         type: 'line',
         data: {
@@ -145,6 +165,11 @@ if (lineCtx) {
 
 const donutCtx = document.getElementById('processStatusChart');
 if (donutCtx) {
+    const existingDonutChart = Chart.getChart(donutCtx);
+    if (existingDonutChart) {
+        existingDonutChart.destroy();
+    }
+
     new Chart(donutCtx, {
         type: 'doughnut',
         data: {

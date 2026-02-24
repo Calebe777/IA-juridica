@@ -23,11 +23,11 @@
 
         <nav class="sidebar__menu">
             <a href="{% url 'financeiro_dashboard' %}" class="menu-item {% if '/financeiro/' in request.path and '/financeiro/lancamentos/' not in request.path and '/financeiro/contas/' not in request.path and '/financeiro/categorias/' not in request.path and '/financeiro/relatorios/' not in request.path %}is-active{% endif %}">Dashboard</a>
-            <a href="{% url 'clientes' %}" class="menu-item {% if '/usuarios/clientes/' in request.path %}is-active{% endif %}">Usuários</a>
+            <a href="{% url 'cadastro' %}" class="menu-item {% if '/usuarios/cadastro/' in request.path %}is-active{% endif %}">Usuários</a>
             <a href="{% url 'clientes' %}" class="menu-item {% if '/usuarios/clientes/' in request.path %}is-active{% endif %}">Clientes</a>
             <a href="{% url 'financeiro_lancamentos' %}" class="menu-item {% if '/financeiro/lancamentos/' in request.path %}is-active{% endif %}">Processos</a>
             <a href="{% url 'financeiro_contas' %}" class="menu-item {% if '/financeiro/contas/' in request.path %}is-active{% endif %}">Agenda &amp; Prazos</a>
-            <a href="{% url 'financeiro_dashboard' %}" class="menu-item {% if '/financeiro/' in request.path %}is-active{% endif %}">Financeiro</a>
+            <a href="{% url 'financeiro_juridico' %}" class="menu-item {% if '/financeiro/juridico/' in request.path %}is-active{% endif %}">Financeiro</a>
             <a href="{% url 'clientes' %}" class="menu-item">Documentos</a>
             <a href="{% url 'financeiro_relatorios' %}" class="menu-item {% if '/financeiro/relatorios/' in request.path %}is-active{% endif %}">Relatórios</a>
             <a href="/admin/" class="menu-item">Configurações</a>
