@@ -8,12 +8,11 @@ from agno.tools import tool
 from agno.vectordb.lancedb import LanceDb
 from .literals import TribunalLiteral
 from dotenv import load_dotenv
-from tzlocal import get_localzone_name
 from agno.tools.googlecalendar import GoogleCalendarTools
 from agno.models.openai import OpenAIChat
-from tzlocal import get_localzone_name
 import datetime
 from django.conf import settings
+from tzlocal import get_localzone_name
 
 load_dotenv()
 
@@ -178,7 +177,6 @@ class SecretariaAI:
             db_file=cls.MEMORY_DB_FILE,
             memory_table=cls.MEMORY_TABLE
         )
-        print(session_id)
         return Agent(
             name="Assistente de Secretaria Virtual",
             description="Assistente virtual para atendimento ao cliente e agendamento de reuniões",

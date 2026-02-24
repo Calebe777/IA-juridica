@@ -1,13 +1,19 @@
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from usuarios.models import Cliente
-from .models import Pergunta, ContextRag
-from django.http import JsonResponse, StreamingHttpResponse
-from .agents import JuriAi, SecretariaAI
+import json
+import time
 from typing import Iterator
-from agno.agent import RunOutputEvent, RunEvent
-from .models import AnaliseJurisprudencia, Documentos
-from agno.agent import RunOutput
+
+from agno.agent import RunEvent, RunOutput, RunOutputEvent
+from django.contrib import messages
+from django.contrib.messages import constants
+from django.http import JsonResponse, StreamingHttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.csrf import csrf_exempt
+
+from ia.agent_langchain import JurisprudenciaAI
+from usuarios.models import Cliente, Documentos
+
+from .agents import JuriAi, SecretariaAI
+from .models import AnaliseJurisprudencia, ContextRag, Pergunta
 from .wrapper_evolution_api import SendMessage
 
 @csrf_exempt
@@ -61,14 +67,6 @@ def analise_jurisprudencia(request, id):
         'analise': analise
     })
 
-from usuarios.models import Documentos
-from ia.agent_langchain import JurisprudenciaAI
-from .models import AnaliseJurisprudencia
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.contrib.messages import constants
-import time
-
 def processar_analise(request, id):
     if request.method != 'POST':
         messages.add_message(request, constants.ERROR, 'Método não permitido.')
@@ -116,15 +114,34 @@ def processar_analise(request, id):
         messages.add_message(request, constants.ERROR, f'Erro ao processar análise: {str(e)}')
         return redirect('analise_jurisprudencia', id=id)
     
-import json
+def _extract_whatsapp_payload(data: dict) -> tuple[str, str]:
+    phone_raw = ((data.get('data') or {}).get('key') or {}).get('remoteJid')
+    if not phone_raw or '@' not in phone_raw:
+        raise ValueError('remoteJid ausente ou inválido')
+
+    message_data = ((data.get('data') or {}).get('message') or {})
+    message = (
+        (message_data.get('extendedTextMessage') or {}).get('text')
+        or (message_data.get('conversation') or '').strip()
+    )
+    if not message:
+        raise ValueError('mensagem ausente no payload')
+
+    return phone_raw.split('@')[0], message
 
 @csrf_exempt
 def webhook_whatsapp(request):
-    data = json.loads(request.body)
-    phone = data.get('data').get('key').get('remoteJid').split('@')[0]
-    message = data.get('data').get('message').get('extendedTextMessage').get('text')
+    try:
+        data = json.loads(request.body)
+        phone, message = _extract_whatsapp_payload(data)
+    except (json.JSONDecodeError, ValueError, AttributeError):
+        return JsonResponse({'error': 'Payload inválido'}, status=400)
+
     agent = SecretariaAI.build_agent(session_id=phone)
     response: RunOutput = agent.run(message)
-    return JsonResponse({'response': response.content})
-    send_message = SendMessage().send_message('Arcane3', {'number': phone, 'textMessage': {'text': response}})
+    SendMessage().send_message(
+        'Arcane3',
+        {'number': phone, 'textMessage': {'text': str(response.content)}}
+    )
 
+    return JsonResponse({'response': response.content})
